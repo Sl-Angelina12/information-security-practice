@@ -5,7 +5,7 @@
 from app.database import SessionLocal
 from app.models import (Role, Permission, User, Group,
                         Subject, role_permissions)
- 
+from app.security import hash_password
  
 def seed():
     db = SessionLocal()
@@ -76,30 +76,29 @@ def seed():
         db.add(subject)
  
         # --- Тестові користувачі ---
-        # УВАГА: паролі у відкритому вигляді!
-        # Буде виправлено у практичній №4
-        admin_user = User(
-            username="admin",
-            email="admin@university.edu",
-            full_name="Адміністратор Системи",
-            password_hash="admin123",
-            is_active=True)
-        admin_user.roles.append(admin)
- 
-        teacher_user = User(
-            username="petrov",
-            email="petrov@university.edu",
-            full_name="Петров Іван Сергійович",
-            password_hash="teacher123")
-        teacher_user.roles.append(teacher)
- 
-        student_user = User(
-            username="ivanov",
-            email="ivanov@university.edu",
-            full_name="Іванов Олексій Петрович",
-            password_hash="student123",
-            group_id=group.id)
-        student_user.roles.append(student)
+        test_users = [
+	{
+    	"username": "admin",
+    	"email": "admin@university.edu",
+    	"full_name": "Адміністратор Системи",
+    	"password_hash": hash_password("Admin123!@#"),
+    	"role": "admin"
+	},
+	{
+    	"username": "teacher01",
+    	"email": "teacher@university.edu",
+    	"full_name": "Іваненко Петро Миколайович",
+    	"password_hash": hash_password("Teacher123!"),
+    	"role": "teacher"
+	},
+	{
+    	"username": "student01",
+    	"email": "student@university.edu",
+    	"full_name": "Петренко Марія Олексіївна",
+    	"password_hash": hash_password("Student123!"),
+    	"role": "student"
+	},
+]
  
         db.add_all([admin_user, teacher_user,
                     student_user])
