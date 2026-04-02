@@ -76,29 +76,30 @@ def seed():
         db.add(subject)
  
         # --- Тестові користувачі ---
-        test_users = [
-	{
-    	"username": "admin",
-    	"email": "admin@university.edu",
-    	"full_name": "Адміністратор Системи",
-    	"password_hash": hash_password("Admin123!@#"),
-    	"role": "admin"
-	},
-	{
-    	"username": "teacher01",
-    	"email": "teacher@university.edu",
-    	"full_name": "Іваненко Петро Миколайович",
-    	"password_hash": hash_password("Teacher123!"),
-    	"role": "teacher"
-	},
-	{
-    	"username": "student01",
-    	"email": "student@university.edu",
-    	"full_name": "Петренко Марія Олексіївна",
-    	"password_hash": hash_password("Student123!"),
-    	"role": "student"
-	},
-]
+        admin_user = User(
+            username="admin",
+            email="admin@university.edu",
+            full_name="Адміністратор Системи",
+            password_hash=hash_password("Admin123!@#"),
+            is_active=True)
+        admin_user.roles.append(admin)
+
+        teacher_user = User(
+            username="teacher01",
+            email="teacher@university.edu",
+            full_name="Іваненко Петро Миколайович",
+            password_hash=hash_password("Teacher123!"),
+            is_active=True)
+        teacher_user.roles.append(teacher)
+
+        student_user = User(
+            username="student01",
+            email="student@university.edu",
+            full_name="Петренко Марія Олексіївна",
+            password_hash=hash_password("Student123!"),
+            is_active=True,
+            group_id=group.id)
+        student_user.roles.append(student)
  
         db.add_all([admin_user, teacher_user,
                     student_user])
