@@ -17,3 +17,4 @@ def health_check():
     	"database": "SQLite",
     	"tables": len(Base.metadata.tables)
 	}
+

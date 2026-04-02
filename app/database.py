@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import Session
 
 DATABASE_URL = "sqlite:///./data/university.db"
 
@@ -14,5 +15,10 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
-class Base(DeclarativeBase):
-    pass
+def get_db():
+    """Генератор сесій бази даних для Dependency Injection."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
