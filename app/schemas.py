@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
- 
+import re 
  
 # ── Схеми для реєстрації ──
  
@@ -29,7 +29,24 @@ class UserCreate(BaseModel):
     	max_length=150,
     	description="Повне ім'я користувача"
 	)
- 
+	
+	@field_validator("password")
+	@classmethod
+	def validate_password_strength(cls, v):
+    	"""Перевірка складності пароля."""
+    	if not re.search(r"[A-Z]", v):
+        	raise ValueError(
+            	"Пароль має містити хоча б одну велику літеру"
+        	)
+    	if not re.search(r"[a-z]", v):
+        	raise ValueError(
+            	"Пароль має містити хоча б одну малу літеру"
+        	)
+    	if not re.search(r"[0-9]", v):
+        	raise ValueError(
+            	"Пароль має містити хоча б одну цифру"
+        	)
+    	return v
  
 class UserResponse(BaseModel):
 	"""Схема відповіді з даними користувача (без пароля!)."""
