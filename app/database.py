@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 
 DATABASE_URL = "sqlite:///./data/university.db"
 
+class Base(DeclarativeBase):
+    pass
+
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},
