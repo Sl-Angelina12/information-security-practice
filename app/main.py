@@ -3,9 +3,9 @@ from app.database import Base, engine
 from app import models  # ★ Новий імпорт
 
 from app.auth.router import router as auth_router
-from app.routes.students import router as students_router
-from app.routes.teachers import router as teachers_router
-from app.routes.admin import router as admin_router
+from app.routers.students import router as students_router
+from app.routers.teachers import router as teachers_router
+from app.routers.admin import router as admin_router
  
 app = FastAPI(
 	title="Електронний деканат",
