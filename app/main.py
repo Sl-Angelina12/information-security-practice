@@ -9,6 +9,7 @@ app = FastAPI(
 	version="0.4.0"
 )
 
+
 # Підключення роутерів
 app.include_router(auth.router)
  
