@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request #Додала Request
 from sqlalchemy.orm import Session
  
 from app.database import get_db
 from app.models import User
 from app.schemas import UserCreate, UserResponse, LoginRequest, LoginResponse
 from app.security import hash_password, verify_password
+from app.middleware.rate_limiter import limiter #Додала імпорт лімітера
  
 router = APIRouter(prefix="/auth", tags=["Authentication"])
  
@@ -13,7 +14,8 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
              response_model=UserResponse,
              status_code=status.HTTP_201_CREATED,
              summary="Реєстрація нового користувача")
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute") # Додала ліміт
+def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)): #Додала request
     """
     Створює нового користувача з хешованим паролем.
  
@@ -61,7 +63,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login",
              response_model=LoginResponse,
              summary="Вхід користувача")
-def login(credentials: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute") # Додала ліміт
+def login(request: Request, credentials: LoginRequest, db: Session = Depends(get_db)): #Додала request
     """
     Аутентифікація користувача за логіном та паролем.
  
