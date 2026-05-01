@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request #Додала Request
 from sqlalchemy.orm import Session
 from jose import JWTError
 
@@ -7,6 +7,7 @@ from app.models import User
 from app.auth.jwt_handler import create_access_token, create_refresh_token, verify_token
 from app.auth.dependencies import get_current_user
 from app.schemas import TokenResponse, TokenRefreshRequest, UserInfo
+from app.middleware.rate_limiter import limiter #Додала імпорт ліміту
 
 # Імпортуйте вашу функцію перевірки пароля з практичної №4
 from app.security import verify_password
@@ -14,9 +15,10 @@ from app.security import verify_password
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-# POST /auth/login — залишаємо з практичної №4, але тепер повертаємо токени
+# POST /auth/login — під захистом Rate Limiting
 @router.post("/login", response_model=TokenResponse)
-def login(username: str, password: str, db: Session = Depends(get_db)):
+@limiter.limit("5/minute") #Додала
+def login(request: Request, username: str, password: str, db: Session = Depends(get_db)): #Додала request
     # 1. Знаходимо користувача
     user = db.query(User).filter(User.username == username).first()
     if not user:
@@ -44,7 +46,8 @@ def login(username: str, password: str, db: Session = Depends(get_db)):
         refresh_token=refresh_token,
     )
 @router.post("/refresh", response_model=TokenResponse)
-def refresh_token(body: TokenRefreshRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute") #Додала 
+def refresh_token(request: Request, body: TokenRefreshRequest, db: Session = Depends(get_db)): #Додала request
     """Оновлення access token за допомогою refresh token."""
     try:
         payload = verify_token(body.refresh_token)
