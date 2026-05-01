@@ -10,7 +10,6 @@ class UserCreate(BaseModel):
         ...,
         min_length=3,
         max_length=50,
-        pattern=r"^[a-zA-Z0-9_]+$",
         description="Логін (латиниця, цифри, підкреслення)"
     )
     email: EmailStr = Field(
@@ -30,22 +29,35 @@ class UserCreate(BaseModel):
         description="Повне ім'я користувача"
     )
     
+    # ── Валідація username ─────────────────────
+    
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        if not re.match(r"^[a-zA-Z0-9_]+$", v):
+            raise ValueError("Логін: лише латинські літери, цифри та _")
+        return v
+
+    # ── Валідація full_name (захист від XSS) ────
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v):
+        if re.search(r"[<>&\"']", v):
+            raise ValueError("Ім’я не може містити < > & \" '")
+        return v.strip()
+
+    # ── Валідація складності пароля ────────────
+
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v):
-        """Перевірка складності пароля."""
         if not re.search(r"[A-Z]", v):
-            raise ValueError(
-                "Пароль має містити хоча б одну велику літеру"
-            )
+            raise ValueError("Пароль має містити хоча б одну велику літеру")
         if not re.search(r"[a-z]", v):
-            raise ValueError(
-                "Пароль має містити хоча б одну малу літеру"
-            )
+            raise ValueError("Пароль має містити хоча б одну малу літеру")
         if not re.search(r"[0-9]", v):
-            raise ValueError(
-                "Пароль має містити хоча б одну цифру"
-            )
+            raise ValueError("Пароль має містити хоча б одну цифру")
         return v
  
 class UserResponse(BaseModel):
