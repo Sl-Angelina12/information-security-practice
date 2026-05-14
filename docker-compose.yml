@@ -11,6 +11,7 @@ services:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=sqlite:///./data/dekanat.db
       - JWT_SECRET_KEY=my-dev-secret-key-32-chars-long!!
+      - ENCRYPTION_KEY=твій_ключ
     restart: unless-stopped
 
 volumes:
