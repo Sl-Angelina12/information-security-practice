@@ -6,7 +6,7 @@ from app import models
 from app.middleware.security_headers import SecurityHeadersMiddleware #Додала
 from app.middleware.rate_limiter import limiter #Додала
 
-from app.routers.routers import router as auth_router
+from app.routers.router import router as auth_router
 from app.routers.students import router as students_router
 from app.routers.teachers import router as teachers_router
 from app.routers.admin import router as admin_router
