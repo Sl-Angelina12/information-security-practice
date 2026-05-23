@@ -11,6 +11,9 @@ from app.routers.students import router as students_router
 from app.routers.teachers import router as teachers_router
 from app.routers.admin import router as admin_router
 
+from app.audit.middleware import AuditMiddleware
+from app.audit.router import router as audit_router
+
 app = FastAPI(
 	title="Електронний деканат",
 	description="API для управління академічними даними",
@@ -32,11 +35,15 @@ app.add_middleware(
 	allow_headers=["Authorization", "Content-Type"],
 )
 
+app.add_middleware(AuditMiddleware)
+
 # Підключення роутерів
 app.include_router(auth_router)
 app.include_router(students_router)
 app.include_router(teachers_router)
 app.include_router(admin_router)
+
+app.include_router(audit_router, prefix="/admin", tags=["audit"])
 
 @app.get("/")
 def root():

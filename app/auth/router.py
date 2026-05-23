@@ -9,6 +9,8 @@ from app.auth.dependencies import get_current_user
 from app.schemas import TokenResponse, TokenRefreshRequest, UserInfo, UserCreate, UserResponse
 from app.middleware.rate_limiter import limiter
 from app.security import hash_password, verify_password
+from app.audit.logger import log_login_success, log_login_failed
+from app.audit.detector import check_brute_force, check_off_hours_access
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -45,21 +47,43 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
 def login(request: Request, username: str, password: str, db: Session = Depends(get_db)):
+
+    ip = request.client.host
+
+    if check_brute_force(db, ip):
+        log_login_failed(db, username, ip, "brute_force_blocked")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Забагато невдалих спроб. Спробуйте пізніше."
+        )
+
     user = db.query(User).filter(User.username == username).first()
     if not user:
+        log_login_failed(db, username, ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Невірний логін або пароль",
         )
 
     if not verify_password(password, user.password_hash):
+        log_login_failed(db, username, ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Невірний логін або пароль",
         )
 
-    role = user.roles[0].name if user.roles else "student"
+    from datetime import datetime, timezone
+    check_off_hours_access(
+        db,
+        user.id,
+        user.username,
+        ip,
+        datetime.now(timezone.utc).hour
+    )
 
+    log_login_success(db, user.id, user.username, ip)
+
+    role = user.roles[0].name if user.roles else "student"
     access_token = create_access_token(user.id, role)
     refresh_token = create_refresh_token(user.id)
 
@@ -67,6 +91,7 @@ def login(request: Request, username: str, password: str, db: Session = Depends(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
 
 
 @router.post("/refresh", response_model=TokenResponse)
