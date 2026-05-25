@@ -3,13 +3,27 @@ services:
     build: .
     container_name: dean_office_api
     ports:
-      - "3010:3010"
+      - "3010:8000"
     volumes:
-      - .:/app_code
-      - ./data:/app_code/data
+      - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=sqlite:///./data/dekanat.db
-      - JWT_SECRET_KEY=my-dev-secret-key-32-chars-long!!
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
     restart: unless-stopped
