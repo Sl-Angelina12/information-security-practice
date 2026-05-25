@@ -14,6 +14,7 @@ from app.routers.admin import router as admin_router
 from app.audit.middleware import AuditMiddleware
 from app.audit.router import router as audit_router
 
+Base.metadata.create_all(bind=engine)
 app = FastAPI(
 	title="Електронний деканат",
 	description="API для управління академічними даними",

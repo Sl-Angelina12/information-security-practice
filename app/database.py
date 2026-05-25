@@ -2,7 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy.orm import Session
 
-DATABASE_URL = "sqlite:///./data/university.db"
+import os
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/dekanat.db")
 
 class Base(DeclarativeBase):
     pass
