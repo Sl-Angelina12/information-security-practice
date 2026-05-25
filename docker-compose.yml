@@ -12,3 +12,4 @@ services:
       - DATABASE_URL=sqlite:///./data/dekanat.db
       - JWT_SECRET_KEY=my-dev-secret-key-32-chars-long!!
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    restart: unless-stopped
